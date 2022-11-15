@@ -1,0 +1,95 @@
+library(strucchange)
+library(fUnitRoots)
+library(astsa)
+library(readxl)
+
+CasosNovos <- read_excel("C:/Users/patjazbik/Desktop/ArtigoCOVID/BreakPoints/Afghanistan.xlsx")
+
+v <- CasosNovos
+View(v)
+
+
+CasosNovos_ts <- ts(v)
+plot(CasosNovos_ts, type='l',xlab="Tempo", ylab="Segunda Derivada",main="Casos")
+
+CasosNovos_ts
+
+
+tt <- 1:length(CasosNovos_ts)
+fit <- ts(loess(CasosNovos_ts ~ tt, span = 0.2)$fitted,)
+lines(fit, col = 2.)
+grid(20)
+
+
+
+#plot(density(CasosNovos_ts), main = "Densidade dos CasosNovos", xlab="CasosNovos")#
+#grid(20)#
+
+#MUDANÇA NA ESTRUTURA DE NÍVEL
+
+CasosNovos_ts ~ 1
+
+summary(lm(CasosNovos_ts ~ 1))
+
+plot(CasosNovos_ts, type='l',xlab="Tempo", ylab="Segunda Derivada",main="Casos")
+lines(ts(fitted(lm(CasosNovos_ts ~ 1)), start = 1, frequency = 1), col = 2)
+grid(20)
+
+CasosNovos_brk <- breakpoints(CasosNovos_ts ~ 1, h = 0.10)
+
+
+summary(CasosNovos_brk)
+
+plot(CasosNovos_brk)
+
+
+plot(CasosNovos_ts, type='l',xlab="Tempo", ylab="Nº de Casos Novos diários",main="Casos Novos RS")
+lines(fitted(CasosNovos_brk, breaks = 5), col = 4)
+lines(confint(CasosNovos_brk, breaks = 5))
+grid(20)
+
+#intervalo de confiança
+
+confint(CasosNovos_brk)
+
+#As datas de intervalo são:
+
+breakdates(CasosNovos_brk, breaks = 5)
+
+#Coeficientes de quebra de nível:
+
+coef(CasosNovos_brk)
+
+#MUDANÇA NA ESTRUTURA DE TENDÊNCIA
+
+CasosNovos_ts ~ tt
+
+l <- length(CasosNovos_ts)
+tt <- 1:l
+trend_fit <- lm(CasosNovos_ts ~ tt)
+summary(trend_fit)
+
+plot(CasosNovos_ts, type='l',xlab="Tempo", ylab="Nº de Casos Novos diários",main="Casos Novos RS")
+lines(ts(fitted(trend_fit), start=1, frequency = 1), col = 2)
+grid(20)
+
+CasosNovos_brk_T <- breakpoints(CasosNovos_ts ~ tt,h=0.10)
+summary(CasosNovos_brk_T)
+
+plot(CasosNovos_brk_T)
+
+plot(CasosNovos_ts, type='l',xlab="Tempo", ylab="Nº de Casos Novos diários",main="Casos Novos RS")
+lines(fitted(CasosNovos_brk_T, breaks = 3), col = 4)
+lines(confint(CasosNovos_brk_T, breaks = 3))
+
+#intervalo de confiança
+
+confint(CasosNovos_brk_T)
+
+#As datas de intervalo são:
+
+breakdates(CasosNovos_brk_T, breaks = 3)
+
+#Coeficientes de quebra de nível:
+
+coef(CasosNovos_brk_T)

@@ -1,0 +1,48 @@
+library(strucchange)
+library(fUnitRoots)
+library(astsa)
+library(readxl)
+
+base <- read_excel("C:\\Users\\patjazbik\\Desktop\\ArtigoCOVID\\BreakPoints\\base.xlsx")
+
+for(i in 1:183){
+
+CasosNovos <- read_excel(file.path(paste("C:\\Users\\patjazbik\\Desktop\\ArtigoCOVID\\BreakPoints\\",base[i,1],".xlsx",sep="")))
+
+v <- CasosNovos
+
+CasosNovos_ts <- ts(v)
+
+CasosNovos_ts
+
+tt <- 1:length(CasosNovos_ts)
+fit <- ts(loess(CasosNovos_ts ~ tt, span = 0.2)$fitted,)
+
+#MUDANÇA NA ESTRUTURA DE NÍVEL
+
+CasosNovos_ts ~ 1
+
+summary(lm(CasosNovos_ts ~ 1))
+
+CasosNovos_brk <- breakpoints(CasosNovos_ts ~ 1, h = 0.10)
+
+summary(CasosNovos_brk)
+
+file.path(paste("C:\\Users\\patjazbik\\Desktop\\ArtigoCOVID\\BreakPoints\\Nivel\\",base[1,1],".txt",sep=""))
+capture.output(summary(CasosNovos_brk), file = file.path(paste("C:\\Users\\patjazbik\\Desktop\\ArtigoCOVID\\BreakPoints\\Nivel\\",base[i,1],".txt",sep="")))
+
+#MUDANÇA NA ESTRUTURA DE TENDÊNCIA
+
+CasosNovos_ts ~ tt
+
+l <- length(CasosNovos_ts)
+tt <- 1:l
+trend_fit <- lm(CasosNovos_ts ~ tt)
+summary(trend_fit)
+
+CasosNovos_brk_T <- breakpoints(CasosNovos_ts ~ tt,h=0.10)
+summary(CasosNovos_brk_T)
+
+capture.output(summary(CasosNovos_brk_T), file = file.path(paste("C:\\Users\\patjazbik\\Desktop\\ArtigoCOVID\\BreakPoints\\Tendencia\\",base[i,1],".txt",sep="")))
+}
+
